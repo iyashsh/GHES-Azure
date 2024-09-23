@@ -1,1 +1,8 @@
-# Ansible inventory file (placeholder)
+all:
+  hosts:
+    primary:
+      ansible_host: <primary-ghes-ip>
+      ansible_user: azureuser
+    replica:
+      ansible_host: <replica-ghes-ip>
+      ansible_user: azureuser

@@ -1,1 +1,23 @@
-# Ansible playbook for user compliance monitoring (placeholder)
+- hosts: ghes
+  tasks:
+    - name: Fetch GitHub Enterprise users
+      uri:
+        url: "https://ghes.example.com/api/v3/users"
+        method: GET
+        headers:
+          Authorization: "token {{ github_token }}"
+      register: users
+
+    - name: Check for non-compliant emails
+      debug:
+        msg: "User {{ item.login }} has a private email address."
+      loop: "{{ users.json }}"
+      when: "'@privateemail.com' in item.email"
+
+    - name: Log non-compliant users
+      lineinfile:
+        path: /var/log/non_compliant_users.log
+        line: "User {{ item.login }} has private email {{ item.email }}"
+      loop: "{{ users.json }}"
+      when: "'@privateemail.com' in item.email"
+

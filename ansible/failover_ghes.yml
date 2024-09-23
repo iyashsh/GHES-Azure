@@ -1,1 +1,22 @@
-# Ansible playbook for failover automation (placeholder)
+- name: GHES Failover Automation
+  hosts: primary
+  tasks:
+    - name: Check GHES status on Primary
+      shell: ghe-check
+      register: ghes_status
+      ignore_errors: yes
+
+    - name: Promote Replica if Primary is Down
+      shell: ghe-repl-promote
+      when: ghes_status.rc != 0
+
+    - name: Send Email Notification for Failover
+      mail:
+        host: smtp.example.com
+        port: 587
+        username: "alert@example.com"
+        password: "password"
+        to: "admin@example.com"
+        subject: "GHES Failover Triggered"
+        body: "The primary GHES instance is down. The replica has been promoted."
+
