@@ -1,31 +1,31 @@
 provider "azurerm" {
   features {}
-  # This block configures the AzureRM provider, which is required to interact with Azure resources.
+  # Configures the Azure Resource Manager (azurerm) provider, required to interact with Azure resources.
 }
 
 resource "azurerm_resource_group" "ghes_rg" {
-  name     = "ghes-resource-group"  # Name of the resource group that will contain all your Azure resources.
-  location = "West Europe"          # Azure region where the resource group will be created (e.g., West Europe).
+  name     = "ghes-resource-group"    # The name of the resource group that will contain all your Azure resources.
+  location = "West Europe"            # Azure region where the resource group will be created (e.g., West Europe).
 }
 
 resource "azurerm_virtual_network" "vnet" {
-  name                = "ghes-vnet"                               # Name of the virtual network (VNet) where your VMs will be placed.
-  address_space       = ["10.0.0.0/16"]                           # IP range (CIDR block) for the VNet, which defines the internal network space.
-  location            = azurerm_resource_group.ghes_rg.location   # Location for the VNet (same as resource group location).
-  resource_group_name = azurerm_resource_group.ghes_rg.name       # Associates the VNet with the resource group created above.
+  name                = "ghes-vnet"                      # Name of the virtual network (VNet) where your VMs will be placed.
+  address_space       = ["10.0.0.0/16"]                  # IP range (CIDR block) for the VNet, defining the internal network space.
+  location            = azurerm_resource_group.ghes_rg.location  # Location for the VNet (same as resource group location).
+  resource_group_name = azurerm_resource_group.ghes_rg.name      # Associates the VNet with the resource group created above.
 }
 
 resource "azurerm_subnet" "subnet" {
-  name                 = "ghes-subnet"                            # Name of the subnet within the VNet where the VMs will be located.
-  resource_group_name  = azurerm_resource_group.ghes_rg.name      # Associates the subnet with the resource group.
-  virtual_network_name = azurerm_virtual_network.vnet.name        # Associates the subnet with the virtual network created above.
-  address_prefixes     = ["10.0.1.0/24"]                          # CIDR block defining the address range for the subnet.
+  name                 = "ghes-subnet"                   # Name of the subnet within the VNet where the VMs will be located.
+  resource_group_name  = azurerm_resource_group.ghes_rg.name   # Associates the subnet with the resource group.
+  virtual_network_name = azurerm_virtual_network.vnet.name      # Associates the subnet with the virtual network created above.
+  address_prefixes     = ["10.0.1.0/24"]                 # CIDR block defining the address range for the subnet.
 }
 
 resource "azurerm_virtual_machine" "primary_vm" {
-  name                  = "ghes-primary-vm"                           # Name of the primary virtual machine (VM) that will run GHES.
-  location              = azurerm_resource_group.ghes_rg.location     # Specifies the region where the VM will be deployed.
-  resource_group_name   = azurerm_resource_group.ghes_rg.name         # Associates the VM with the resource group created earlier.
+  name                  = "ghes-primary-vm"               # Name of the primary virtual machine (VM) that will run GHES.
+  location              = azurerm_resource_group.ghes_rg.location  # Specifies the region where the VM will be deployed.
+  resource_group_name   = azurerm_resource_group.ghes_rg.name      # Associates the VM with the resource group created earlier.
   network_interface_ids = [azurerm_network_interface.primary_nic.id]  # References the network interface (NIC) for the VM.
 
   vm_size               = "Standard_D4as_v5"              # Specifies the size of the VM (4 vCPUs, 32GB memory, etc.).
@@ -60,9 +60,9 @@ resource "azurerm_virtual_machine" "primary_vm" {
 }
 
 resource "azurerm_virtual_machine" "replica_vm" {
-  name                  = "ghes-replica-vm"                           # Name of the replica virtual machine for GHES.
-  location              = "Germany West Central"                      # Region where the replica VM will be deployed.
-  resource_group_name   = azurerm_resource_group.ghes_rg.name         # Associates the replica VM with the same resource group.
+  name                  = "ghes-replica-vm"               # Name of the replica virtual machine for GHES.
+  location              = "Germany West Central"          # Region where the replica VM will be deployed.
+  resource_group_name   = azurerm_resource_group.ghes_rg.name  # Associates the replica VM with the same resource group.
   network_interface_ids = [azurerm_network_interface.replica_nic.id]  # References the network interface for the replica VM.
 
   vm_size               = "Standard_D4as_v5"              # Specifies the size of the replica VM (same as primary).
@@ -93,5 +93,51 @@ resource "azurerm_virtual_machine" "replica_vm" {
 
   tags = {                                                # Tags for the replica VM.
     environment = "replica"                               # Identifies this VM as the replica in the environment.
+  }
+}
+
+# DevTest Lab resources to manage VM auto-shutdown and auto-start
+
+resource "azurerm_dev_test_lab" "ghes_lab" {
+  name                = "ghes-auto-lab"                   # Name of the DevTest Lab, used for setting up schedules for auto-shutdown/start.
+  location            = azurerm_resource_group.ghes_rg.location   # Location for the DevTest Lab (same as resource group location).
+  resource_group_name = azurerm_resource_group.ghes_rg.name        # Associates the DevTest Lab with the resource group.
+}
+
+# Schedule for auto-shutdown at 8 PM CET (Central European Time)
+
+resource "azurerm_dev_test_schedule" "ghes_shutdown_schedule" {
+  name                = "auto-shutdown"                   # Name of the auto-shutdown schedule.
+  location            = azurerm_resource_group.ghes_rg.location    # Location for the schedule.
+  resource_group_name = azurerm_resource_group.ghes_rg.name         # Associates the schedule with the resource group.
+  lab_name            = azurerm_dev_test_lab.ghes_lab.name          # Associates the schedule with the DevTest Lab.
+  task_type           = "Shutdown"                        # Type of task - in this case, shutting down the VM.
+  status              = "Enabled"                         # Enables the schedule.
+
+  daily_recurrence_time = "20:00"                         # Time in HH:MM format for auto-shutdown at 8 PM CET.
+
+  time_zone_id        = "Central European Standard Time"  # Time zone for the shutdown schedule (CET).
+  
+  notification_settings {
+    status = "Disabled"                                   # Disables notifications (you can enable if needed).
+  }
+}
+
+# Schedule for auto-start at 8 AM CET (Central European Time)
+
+resource "azurerm_dev_test_schedule" "ghes_start_schedule" {
+  name                = "auto-start"                      # Name of the auto-start schedule.
+  location            = azurerm_resource_group.ghes_rg.location    # Location for the schedule.
+  resource_group_name = azurerm_resource_group.ghes_rg.name         # Associates the schedule with the resource group.
+  lab_name            = azurerm_dev_test_lab.ghes_lab.name          # Associates the schedule with the DevTest Lab.
+  task_type           = "Start"                           # Type of task - in this case, starting the VM.
+  status              = "Enabled"                         # Enables the schedule.
+
+  daily_recurrence_time = "08:00"                         # Time in HH:MM format for auto-start at 8 AM CET.
+
+  time_zone_id        = "Central European Standard Time"  # Time zone for the start schedule (CET).
+  
+  notification_settings {
+    status = "Disabled"                                   # Disables notifications (you can enable if needed).
   }
 }
