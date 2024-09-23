@@ -25,7 +25,7 @@ Follow the steps below to set up the project and deploy GHES on Azure:
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/GHES-Azure.git
+    git clone https://github.com/iyashsh/GHES-Azure
     cd GHES-Azure
     ```
 
