@@ -39,6 +39,7 @@ Follow the steps below to set up the project and deploy GHES on Azure:
 4. **Ansible Setup**:
     - Configure Ansible playbooks for automation tasks.
 
+For detail documentation check: [Dummies Guide](./doc) 
 
 ## Workflow and Best Practices
 - The project follows **Infrastructure as Code (IaC)** principles, with **Terraform** used for provisioning Azure resources and **Ansible** for automating post-deployment tasks such as failover management and compliance monitoring.
@@ -51,7 +52,7 @@ Follow the steps below to set up the project and deploy GHES on Azure:
 ├── /ansible                     # Ansible playbooks and configurations
 ├── /scripts                     # Any scripts for automating GHES tasks
 ├── .gitignore                   # Files to exclude from version control
-└── README.md                    # Summarized documentation, for detail documentation check: [Dummies Guide](https://github.com/iyashsh/GHES-Azure/tree/main/doc)
+└── README.md                    # Summarized documentation
 ```
 
 ## How to Contribute
