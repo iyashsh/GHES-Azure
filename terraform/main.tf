@@ -28,7 +28,7 @@ resource "azurerm_virtual_machine" "primary_vm" {
   resource_group_name   = azurerm_resource_group.ghes_rg.name      # Associates the VM with the resource group created earlier.
   network_interface_ids = [azurerm_network_interface.primary_nic.id]  # References the network interface (NIC) for the VM.
 
-  vm_size               = "Standard_D4as_v5"              # Specifies the size of the VM (4 vCPUs, 32GB memory, etc.).
+  vm_size               = "Standard_DC4ds_v3"              # Specifies the VM size (4 vCPUs, 32GB RAM).
 
   storage_image_reference {                               # Specifies the Azure Marketplace image to use for the VM.
     publisher = "GitHub"                                  # The publisher of the GHES image.
@@ -65,7 +65,7 @@ resource "azurerm_virtual_machine" "replica_vm" {
   resource_group_name   = azurerm_resource_group.ghes_rg.name  # Associates the replica VM with the same resource group.
   network_interface_ids = [azurerm_network_interface.replica_nic.id]  # References the network interface for the replica VM.
 
-  vm_size               = "Standard_D4as_v5"              # Specifies the size of the replica VM (same as primary).
+  vm_size               = "Standard_DC4ds_v3"             # Specifies the VM size for the replica (same as primary).
 
   storage_image_reference {                               # Specifies the GHES image from the Azure Marketplace.
     publisher = "GitHub"                                  # The publisher of the GHES image.
@@ -96,7 +96,7 @@ resource "azurerm_virtual_machine" "replica_vm" {
   }
 }
 
-# DevTest Lab resources to manage VM auto-shutdown and auto-start
+# DevTest Lab resource to manage VM auto-shutdown and auto-start
 
 resource "azurerm_dev_test_lab" "ghes_lab" {
   name                = "ghes-auto-lab"                   # Name of the DevTest Lab, used for setting up schedules for auto-shutdown/start.
@@ -104,7 +104,7 @@ resource "azurerm_dev_test_lab" "ghes_lab" {
   resource_group_name = azurerm_resource_group.ghes_rg.name        # Associates the DevTest Lab with the resource group.
 }
 
-# Schedule for auto-shutdown at 8 PM CET (Central European Time)
+# Schedule for auto-shutdown at 8 PM CET every day
 
 resource "azurerm_dev_test_schedule" "ghes_shutdown_schedule" {
   name                = "auto-shutdown"                   # Name of the auto-shutdown schedule.
@@ -114,28 +114,32 @@ resource "azurerm_dev_test_schedule" "ghes_shutdown_schedule" {
   task_type           = "Shutdown"                        # Type of task - in this case, shutting down the VM.
   status              = "Enabled"                         # Enables the schedule.
 
-  daily_recurrence_time = "20:00"                         # Time in HH:MM format for auto-shutdown at 8 PM CET.
+  daily_recurrence {
+    time               = "2000"                            # Shutdown time at 8 PM CET (24-hour format, no colon).
+  }
 
-  time_zone_id        = "Central European Standard Time"  # Time zone for the shutdown schedule (CET).
+  time_zone_id        = "Central European Standard Time"  # Time zone set to CET.
   
   notification_settings {
     status = "Disabled"                                   # Disables notifications (you can enable if needed).
   }
 }
 
-# Schedule for auto-start at 8 AM CET (Central European Time)
+# Schedule for auto-start at 8 AM CET every day
 
 resource "azurerm_dev_test_schedule" "ghes_start_schedule" {
   name                = "auto-start"                      # Name of the auto-start schedule.
   location            = azurerm_resource_group.ghes_rg.location    # Location for the schedule.
   resource_group_name = azurerm_resource_group.ghes_rg.name         # Associates the schedule with the resource group.
   lab_name            = azurerm_dev_test_lab.ghes_lab.name          # Associates the schedule with the DevTest Lab.
-  task_type           = "Start"                           # Type of task - in this case, starting the VM.
+  task_type           = "Start"                           # Type of task - starting the VM.
   status              = "Enabled"                         # Enables the schedule.
 
-  daily_recurrence_time = "08:00"                         # Time in HH:MM format for auto-start at 8 AM CET.
+  daily_recurrence {
+    time               = "0800"                            # Start time at 8 AM CET (24-hour format, no colon).
+  }
 
-  time_zone_id        = "Central European Standard Time"  # Time zone for the start schedule (CET).
+  time_zone_id        = "Central European Standard Time"  # Time zone set to CET.
   
   notification_settings {
     status = "Disabled"                                   # Disables notifications (you can enable if needed).
