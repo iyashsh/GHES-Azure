@@ -51,7 +51,7 @@ Follow the steps below to set up the project and deploy GHES on Azure:
 ├── /ansible                     # Ansible playbooks and configurations
 ├── /scripts                     # Any scripts for automating GHES tasks
 ├── .gitignore                   # Files to exclude from version control
-└── README.md                    # Summarized documentation, for detail documentation check: [Dummies Guide](./doc/)
+└── README.md                    # Summarized documentation, for detail documentation check: [Dummies Guide](https://github.com/iyashsh/GHES-Azure/tree/main/doc)
 ```
 
 ## How to Contribute
