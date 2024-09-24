@@ -3,6 +3,9 @@
 ## Objective
 This project automates the deployment and management of **GitHub Enterprise Server (GHES)** on **Microsoft Azure** using **Terraform** and **Ansible** to ensure high availability, compliance, and data recovery.
 
+## Current Status
+Untested, unreviewd and unverfied
+
 ## Prerequisites
 - Basic understanding of **Terraform** and **Ansible**.
 - Azure account (Free or Paid).
