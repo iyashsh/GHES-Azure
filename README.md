@@ -34,10 +34,10 @@ Follow the steps below to set up the project and deploy GHES on Azure:
     - Create a Resource Group and Service Principal.
 
 3. **Terraform Setup**:
-    - Define and configure infrastructure in the Terraform files (hidden for security).
+    - Define and configure infrastructure in the Terraform files.
 
 4. **Ansible Setup**:
-    - Configure Ansible playbooks for automation tasks (hidden for security).
+    - Configure Ansible playbooks for automation tasks.
 
 
 ## Workflow and Best Practices
@@ -47,11 +47,11 @@ Follow the steps below to set up the project and deploy GHES on Azure:
 ## Repository Structure
 ```plaintext
 /GHES-Azure                      # Root directory of the infrastructure project
-├── /terraform                   # Terraform configurations (hidden)
-├── /ansible                     # Ansible playbooks and configurations (hidden)
-├── /scripts                     # Any scripts for automating GHES tasks (hidden)
+├── /terraform                   # Terraform configurations
+├── /ansible                     # Ansible playbooks and configurations
+├── /scripts                     # Any scripts for automating GHES tasks
 ├── .gitignore                   # Files to exclude from version control
-└── README.md                    # Documentation (this file)
+└── README.md                    # Summarized documentation, for detail documentation check: [Dummies Guide](./doc/)
 ```
 
 ## How to Contribute
